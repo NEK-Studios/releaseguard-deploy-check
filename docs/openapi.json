@@ -1,0 +1,616 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ReleaseGuard API (local preview)",
+    "version": "0.5.0",
+    "summary": "Deterministic release checks for package.json manifests.",
+    "description": "Unauthenticated LOCAL-only preview. Evaluates a supplied package.json manifest with a fixed rule catalog and returns findings with evidence and remediation. No repository access, no code execution, no remote fetch, no persistence. Do not publish or use as a commercial API until auth, limits and a privacy review are in place."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:4318",
+      "description": "Local preview (npm run dev)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "checks"
+    },
+    {
+      "name": "meta"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "getHealth",
+        "tags": [
+          "meta"
+        ],
+        "summary": "Liveness and versions",
+        "responses": {
+          "200": {
+            "description": "Running locally.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/openapi.json": {
+      "get": {
+        "operationId": "getOpenApiDocument",
+        "tags": [
+          "meta"
+        ],
+        "summary": "This OpenAPI 3.1 document",
+        "responses": {
+          "200": {
+            "description": "OpenAPI 3.1 document.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/release-check": {
+      "post": {
+        "operationId": "createReleaseCheck",
+        "tags": [
+          "checks"
+        ],
+        "summary": "Analyze a supplied package manifest",
+        "description": "Synchronous and stateless. The same request always returns the same report for a given toolVersion and rulesetVersion. Request body limit: 65536 bytes.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseCheckRequest"
+              },
+              "example": {
+                "manifest": {
+                  "name": "releaseguard-demo-next",
+                  "version": "0.0.0",
+                  "private": true,
+                  "packageManager": "npm@10.9.0",
+                  "dependencies": {
+                    "next": "latest",
+                    "react": "*",
+                    "convex": "^1.0.0"
+                  },
+                  "devDependencies": {
+                    "react": "^19.0.0"
+                  },
+                  "scripts": {
+                    "dev": "next dev"
+                  }
+                },
+                "lockfiles": [
+                  "pnpm-lock.yaml"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Findings and advisory status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReleaseCheckReport"
+                },
+                "example": {
+                  "schemaVersion": "1.3",
+                  "rulesetVersion": "0.3.0",
+                  "toolVersion": "0.5.0",
+                  "rulePacks": [],
+                  "project": "releaseguard-demo-next",
+                  "frameworks": {
+                    "next": true,
+                    "expo": false,
+                    "convex": true
+                  },
+                  "status": "review",
+                  "counts": {
+                    "errors": 0,
+                    "warnings": 5,
+                    "info": 1
+                  },
+                  "findings": [
+                    {
+                      "ruleId": "RG-NEXT-DOM",
+                      "severity": "warning",
+                      "message": "Next.js is declared without react-dom.",
+                      "evidence": {
+                        "package": "next",
+                        "reactDomDeclared": false
+                      },
+                      "remediation": "Review the official Next.js install requirements for your version."
+                    },
+                    {
+                      "ruleId": "RG-NEXT-BUILD",
+                      "severity": "info",
+                      "message": "No build script is declared for this Next.js package.",
+                      "evidence": {
+                        "nextDeclared": true,
+                        "script": "build"
+                      },
+                      "remediation": "If this is a deployable app, add and verify an appropriate build script."
+                    },
+                    {
+                      "ruleId": "RG-DEP-DUPLICATE",
+                      "severity": "warning",
+                      "message": "Dependency react appears in dependencies and devDependencies.",
+                      "evidence": {
+                        "name": "react",
+                        "dependencies": "*",
+                        "devDependencies": "^19.0.0"
+                      },
+                      "remediation": "Choose the intended dependency scope and remove the duplicate declaration."
+                    },
+                    {
+                      "ruleId": "RG-DEP-UNPINNED",
+                      "severity": "warning",
+                      "message": "Dependency next uses a floating latest version.",
+                      "evidence": {
+                        "name": "next",
+                        "version": "latest"
+                      },
+                      "remediation": "Specify a reviewed version range and commit a lockfile."
+                    },
+                    {
+                      "ruleId": "RG-DEP-UNPINNED",
+                      "severity": "warning",
+                      "message": "Dependency react uses a floating * version.",
+                      "evidence": {
+                        "name": "react",
+                        "version": "*"
+                      },
+                      "remediation": "Specify a reviewed version range and commit a lockfile."
+                    },
+                    {
+                      "ruleId": "RG-LOCKFILE-MISMATCH",
+                      "severity": "warning",
+                      "message": "Declared packageManager (npm) does not match pnpm-lock.yaml.",
+                      "evidence": {
+                        "packageManager": "npm",
+                        "lockfile": "pnpm-lock.yaml",
+                        "lockfileManager": "pnpm"
+                      },
+                      "remediation": "Verify and standardize the package manager and lockfile."
+                    }
+                  ],
+                  "disclaimer": "Static manifest checks only. This does not build the project, verify version compatibility, or certify release readiness."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Body is not valid JSON (invalid_json) or does not match the request schema (invalid_request).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_json": {
+                    "value": {
+                      "error": {
+                        "code": "invalid_json",
+                        "message": "Request body is not valid JSON."
+                      }
+                    }
+                  },
+                  "invalid_request": {
+                    "value": {
+                      "error": {
+                        "code": "invalid_request",
+                        "message": "manifest.dependencies.next must be a string",
+                        "path": "manifest.dependencies.next"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Wrong HTTP method. The Allow header lists the supported ones.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "method_not_allowed",
+                    "message": "Method not allowed for this path."
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "payload_too_large",
+                    "message": "Request body exceeds 65536 bytes."
+                  }
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Content-Type is not application/json.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "unsupported_media_type",
+                    "message": "Content-Type must be application/json."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error. No details are disclosed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "code": "internal_error",
+                    "message": "Unexpected server error."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ReleaseCheckRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "manifest"
+        ],
+        "properties": {
+          "manifest": {
+            "type": "object",
+            "description": "Parsed package.json content. Only the listed properties are evaluated; all other properties are ignored.",
+            "properties": {
+              "name": {
+                "description": "Used as project label when it is a string."
+              },
+              "private": {
+                "description": "Evaluated by RG-WORKSPACE-PRIVATE."
+              },
+              "dependencies": {
+                "type": "object",
+                "description": "Package name to version spec.",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "devDependencies": {
+                "type": "object",
+                "description": "Package name to version spec.",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "scripts": {
+                "type": "object",
+                "description": "Script name to command. Commands are never executed and never echoed.",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "packageManager": {
+                "type": "string",
+                "description": "Corepack style, e.g. \"pnpm@10.0.0\"."
+              },
+              "workspaces": {
+                "type": [
+                  "array",
+                  "object"
+                ]
+              },
+              "engines": {
+                "description": "engines.node is evaluated when it is a string; other content is ignored."
+              }
+            },
+            "additionalProperties": true
+          },
+          "lockfiles": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "description": "Names or paths of lockfiles that exist in the project. Only the file name is evaluated; contents are never read."
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Hosting platforms the project deploys to. A platform is only accepted when a loaded rule pack knows it; without such a pack any value is rejected as invalid_request."
+          }
+        }
+      },
+      "Finding": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ruleId",
+          "severity",
+          "message",
+          "evidence",
+          "remediation"
+        ],
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "pattern": "^RG-[A-Z]+(-[A-Z]+)+$",
+            "description": "Free rules: see docs. Rule packs add their own ids."
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "object",
+            "description": "Machine-readable facts that triggered the rule. Shape depends on ruleId. Rules based on vendor data add \"source\" (vendor URL) and \"verifiedOn\" (date the fact was last checked there).",
+            "additionalProperties": true
+          },
+          "remediation": {
+            "type": "string"
+          }
+        }
+      },
+      "ReleaseCheckReport": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schemaVersion",
+          "rulesetVersion",
+          "toolVersion",
+          "rulePacks",
+          "project",
+          "frameworks",
+          "status",
+          "counts",
+          "findings",
+          "disclaimer"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "description": "Version of this report shape.",
+            "examples": [
+              "1.3"
+            ]
+          },
+          "rulesetVersion": {
+            "type": "string",
+            "description": "Version of the rule catalog.",
+            "examples": [
+              "0.3.0"
+            ]
+          },
+          "toolVersion": {
+            "type": "string",
+            "description": "Version of ReleaseGuard.",
+            "examples": [
+              "0.5.0"
+            ]
+          },
+          "rulePacks": {
+            "type": "array",
+            "description": "Rule packs that were loaded for this report, in load order. Empty for the free rules alone.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "version"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "frameworks": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "next",
+              "expo",
+              "convex"
+            ],
+            "properties": {
+              "next": {
+                "type": "boolean"
+              },
+              "expo": {
+                "type": "boolean"
+              },
+              "convex": {
+                "type": "boolean"
+              }
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "issues",
+              "review"
+            ],
+            "description": "\"issues\" when at least one finding has severity error, otherwise \"review\". There is no \"passed\": static manifest checks cannot certify a release."
+          },
+          "counts": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "errors",
+              "warnings",
+              "info"
+            ],
+            "properties": {
+              "errors": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "warnings": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "info": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "findings": {
+            "type": "array",
+            "description": "Deterministic order: rule catalog order, then package or file name.",
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            }
+          },
+          "disclaimer": {
+            "type": "string"
+          }
+        }
+      },
+      "Health": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "mode",
+          "apiVersion",
+          "toolVersion",
+          "rulesetVersion"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok"
+          },
+          "mode": {
+            "type": "string",
+            "const": "local-preview"
+          },
+          "apiVersion": {
+            "type": "string",
+            "examples": [
+              "v1"
+            ]
+          },
+          "toolVersion": {
+            "type": "string",
+            "examples": [
+              "0.5.0"
+            ]
+          },
+          "rulesetVersion": {
+            "type": "string",
+            "examples": [
+              "0.3.0"
+            ]
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "invalid_json",
+                  "invalid_request",
+                  "not_found",
+                  "method_not_allowed",
+                  "payload_too_large",
+                  "unsupported_media_type",
+                  "internal_error"
+                ],
+                "description": "Stable, machine-readable."
+              },
+              "message": {
+                "type": "string",
+                "description": "Human-readable. Wording may change."
+              },
+              "path": {
+                "type": "string",
+                "description": "Only for invalid_request: dotted path to the offending value.",
+                "examples": [
+                  "manifest.dependencies.next"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

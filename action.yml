@@ -1,0 +1,50 @@
+name: ReleaseGuard Deploy Check
+description: Deterministic package.json checks for Next.js, Expo and Convex. JSON findings for CI and coding agents.
+author: NEK Studios
+branding:
+  icon: shield
+  color: green
+
+inputs:
+  manifest:
+    description: Path to the package.json to check.
+    required: false
+    default: package.json
+  lockfiles:
+    description: >-
+      Lockfile names to consider, separated by commas or line breaks. Default: known lockfiles found next to the
+      manifest. Only names are evaluated; contents are never read.
+    required: false
+    default: ''
+  packs:
+    description: >-
+      Rule packs to load, separated by commas or line breaks: folders in the workspace or installed package names.
+      Packs are code that runs in this step; load only packs you trust.
+    required: false
+    default: ''
+  targets:
+    description: >-
+      Hosting platforms the project deploys to, separated by commas or line breaks. A platform needs a rule pack
+      that knows it.
+    required: false
+    default: ''
+  fail-on:
+    description: 'When the step fails: "error" (default), "warning" (errors or warnings) or "never".'
+    required: false
+    default: error
+
+outputs:
+  status:
+    description: '"issues" when at least one error finding exists, otherwise "review".'
+  errors:
+    description: Number of error findings.
+  warnings:
+    description: Number of warning findings.
+  info:
+    description: Number of info findings.
+  report:
+    description: Path of the full JSON report on the runner.
+
+runs:
+  using: node24
+  main: src/action.mjs

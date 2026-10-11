@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "1.3",
+  "rulesetVersion": "0.3.0",
+  "toolVersion": "0.5.0",
+  "rulePacks": [],
+  "project": "releaseguard-demo-next",
+  "frameworks": {
+    "next": true,
+    "expo": false,
+    "convex": true
+  },
+  "status": "review",
+  "counts": {
+    "errors": 0,
+    "warnings": 5,
+    "info": 1
+  },
+  "findings": [
+    {
+      "ruleId": "RG-NEXT-DOM",
+      "severity": "warning",
+      "message": "Next.js is declared without react-dom.",
+      "evidence": {
+        "package": "next",
+        "reactDomDeclared": false
+      },
+      "remediation": "Review the official Next.js install requirements for your version."
+    },
+    {
+      "ruleId": "RG-NEXT-BUILD",
+      "severity": "info",
+      "message": "No build script is declared for this Next.js package.",
+      "evidence": {
+        "nextDeclared": true,
+        "script": "build"
+      },
+      "remediation": "If this is a deployable app, add and verify an appropriate build script."
+    },
+    {
+      "ruleId": "RG-DEP-DUPLICATE",
+      "severity": "warning",
+      "message": "Dependency react appears in dependencies and devDependencies.",
+      "evidence": {
+        "name": "react",
+        "dependencies": "*",
+        "devDependencies": "^19.0.0"
+      },
+      "remediation": "Choose the intended dependency scope and remove the duplicate declaration."
+    },
+    {
+      "ruleId": "RG-DEP-UNPINNED",
+      "severity": "warning",
+      "message": "Dependency next uses a floating latest version.",
+      "evidence": {
+        "name": "next",
+        "version": "latest"
+      },
+      "remediation": "Specify a reviewed version range and commit a lockfile."
+    },
+    {
+      "ruleId": "RG-DEP-UNPINNED",
+      "severity": "warning",
+      "message": "Dependency react uses a floating * version.",
+      "evidence": {
+        "name": "react",
+        "version": "*"
+      },
+      "remediation": "Specify a reviewed version range and commit a lockfile."
+    },
+    {
+      "ruleId": "RG-LOCKFILE-MISMATCH",
+      "severity": "warning",
+      "message": "Declared packageManager (npm) does not match pnpm-lock.yaml.",
+      "evidence": {
+        "packageManager": "npm",
+        "lockfile": "pnpm-lock.yaml",
+        "lockfileManager": "pnpm"
+      },
+      "remediation": "Verify and standardize the package manager and lockfile."
+    }
+  ],
+  "disclaimer": "Static manifest checks only. This does not build the project, verify version compatibility, or certify release readiness."
+}

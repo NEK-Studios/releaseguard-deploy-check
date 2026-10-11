@@ -1,0 +1,40 @@
+{
+  "name": "releaseguard-deploy-check",
+  "version": "0.5.0",
+  "description": "Deterministic package.json checks for Next.js, Expo and Convex. JSON findings for CI and coding agents.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "releaseguard-deploy-check": "src/cli.mjs",
+    "releaseguard": "src/cli.mjs"
+  },
+  "files": [
+    "src",
+    "action.yml",
+    "docs",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "package-json",
+    "nextjs",
+    "expo",
+    "convex",
+    "ci",
+    "github-actions",
+    "lockfile",
+    "mcp",
+    "coding-agents"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NEK-Studios/releaseguard-deploy-check.git"
+  },
+  "license": "MIT"
+}
