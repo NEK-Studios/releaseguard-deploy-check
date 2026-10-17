@@ -11,7 +11,7 @@ export const SCHEMA_VERSION = '1.3';
 /** Behaviour of the free rules in src/rules.mjs. Changes whenever one is added, removed or reports differently. Rule packs carry their own version. */
 export const RULESET_VERSION = '0.3.0';
 /** Must equal "version" in package.json (checked by tests/contract.test.mjs). */
-export const TOOL_VERSION = '0.5.0';
+export const TOOL_VERSION = '0.5.1';
 
 export const LIMITS = Object.freeze({
   /** Request body and CLI manifest file. */

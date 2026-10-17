@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "ReleaseGuard API (local preview)",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "summary": "Deterministic release checks for package.json manifests.",
     "description": "Unauthenticated LOCAL-only preview. Evaluates a supplied package.json manifest with a fixed rule catalog and returns findings with evidence and remediation. No repository access, no code execution, no remote fetch, no persistence. Do not publish or use as a commercial API until auth, limits and a privacy review are in place."
   },
@@ -114,7 +114,7 @@
                 "example": {
                   "schemaVersion": "1.3",
                   "rulesetVersion": "0.3.0",
-                  "toolVersion": "0.5.0",
+                  "toolVersion": "0.5.1",
                   "rulePacks": [],
                   "project": "releaseguard-demo-next",
                   "frameworks": {
@@ -439,7 +439,7 @@
             "type": "string",
             "description": "Version of ReleaseGuard.",
             "examples": [
-              "0.5.0"
+              "0.5.1"
             ]
           },
           "rulePacks": {
@@ -557,7 +557,7 @@
           "toolVersion": {
             "type": "string",
             "examples": [
-              "0.5.0"
+              "0.5.1"
             ]
           },
           "rulesetVersion": {

@@ -56,7 +56,7 @@ Findings appear as annotations on the manifest and in the job summary. Lockfiles
 
 ## Coding agents
 
-- **Hook** for Claude Code and Codex: `npx releaseguard-deploy-check hook` checks a `package.json` right after the agent edited it and reports findings back to the agent.
+- **Hook** for Claude Code and Codex: checks a `package.json` right after the agent edited it and reports findings back to the agent. Install it once with `npm install --save-dev releaseguard-deploy-check` so the hook starts in a fraction of a second instead of going through `npx` on every edit.
 - **MCP server** over stdio with one read-only tool: `npx releaseguard-deploy-check mcp`.
 - **Any agent:** add one line to your `AGENTS.md`: "After changing package.json, run `npx releaseguard-deploy-check package.json` and fix every finding with severity error before you commit."
 
@@ -98,6 +98,12 @@ A pack is code that runs with the rights of the check, so only load packs you tr
 - Names from the manifest are escaped before they reach workflow commands, job summaries or an agent.
 
 ReleaseGuard is an independent tool and is not affiliated with Vercel, Expo or Convex.
+
+## Tell us how it went (optional)
+
+The tool sends nothing home, so we only learn whether it helps if you tell us. If you like, open a short
+[first check report](https://github.com/NEK-Studios/releaseguard-deploy-check/issues/new?template=first-check.yml): how you ran it, whether the first finding was real, and
+what got in the way. Please leave out anything private.
 
 ## License
 

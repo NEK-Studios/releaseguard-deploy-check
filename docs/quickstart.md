@@ -1,6 +1,7 @@
 # Quickstart
 
-Requirements: Node.js 22 or newer. No install step, no network access, nothing is uploaded.
+Requirements: Node.js 22 or newer. Try it with `npx` without installing anything. For hooks, install it once as a dev
+dependency (section 4). The tool itself makes no network requests and uploads nothing.
 
 ## 1. Command line
 
@@ -47,6 +48,16 @@ npx releaseguard-deploy-check package.json > releaseguard-report.json
 `releaseguard hook` is made for hooks that run after an agent edited a file. It reads the hook event as JSON from
 stdin and stays silent unless the edited file is a `package.json`.
 
+A hook runs after every edit of the agent, so start it without `npx`. Install it once in your project:
+
+```sh
+npm install --save-dev releaseguard-deploy-check
+```
+
+The snippets below then start it with `node` directly, which took under 0.2 seconds per edit in our measurements.
+`npx releaseguard-deploy-check hook` works too, but `npx` checks the registry on every call: 0.6 seconds per edit on
+Linux and 10 to 13 seconds on Windows.
+
 | Situation | Exit code | Output |
 |---|---|---|
 | Another file was edited, or no finding at the threshold | `0` | none |
@@ -70,7 +81,7 @@ name. Manifests inside `node_modules` are ignored.
         "hooks": [
           {
             "type": "command",
-            "command": "npx releaseguard-deploy-check hook"
+            "command": "node \"${CLAUDE_PROJECT_DIR}/node_modules/releaseguard-deploy-check/src/cli.mjs\" hook"
           }
         ]
       }
@@ -95,7 +106,7 @@ itself has already happened and is not undone.
         "hooks": [
           {
             "type": "command",
-            "command": "npx releaseguard-deploy-check hook"
+            "command": "node node_modules/releaseguard-deploy-check/src/cli.mjs hook"
           }
         ]
       }

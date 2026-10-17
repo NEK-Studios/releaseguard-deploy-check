@@ -1,0 +1,50 @@
+name: First check report (optional)
+description: Tell us whether your first ReleaseGuard check worked. No personal data needed.
+title: "First check: "
+labels: ["first-check"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for trying ReleaseGuard Deploy Check. This report is optional and public.
+        Please do not paste your package.json, repository names, paths or anything private. The answers below are enough.
+  - type: dropdown
+    id: path
+    attributes:
+      label: How did you run it?
+      options:
+        - npx or command line
+        - GitHub Action
+        - Agent hook (Claude Code or Codex)
+        - MCP server
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: What happened on the first run?
+      options:
+        - It reported a real problem
+        - It reported something that was not a problem (false alarm)
+        - It found nothing
+        - It did not run
+    validations:
+      required: true
+  - type: dropdown
+    id: time
+    attributes:
+      label: Time from the first command to the first report
+      options:
+        - Under 1 minute
+        - 1 to 5 minutes
+        - More than 5 minutes
+  - type: input
+    id: rule
+    attributes:
+      label: Rule ID, if it reported one (optional)
+      placeholder: RG-NEXT-REACT
+  - type: textarea
+    id: friction
+    attributes:
+      label: Anything that got in the way? (optional)

@@ -1,6 +1,6 @@
 {
   "name": "releaseguard-deploy-check",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Deterministic package.json checks for Next.js, Expo and Convex. JSON findings for CI and coding agents.",
   "type": "module",
   "engines": {
